@@ -1,3 +1,3 @@
 # MotoTDD
 
-This project will be 100% driven with TDD.
+This project will be 100% riden with TDD.

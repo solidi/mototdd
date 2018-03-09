@@ -26,7 +26,7 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "katana/build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew lint test
+          command: ./gradlew lint jacocoTestReport
       - store_artifacts:
           path: katana/build/reports
           destination: reports

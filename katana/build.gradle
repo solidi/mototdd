@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'jacoco'
 
 android {
     compileSdkVersion 27
@@ -12,6 +13,47 @@ android {
         versionCode 1
         versionName "1.0"
     }
+}
+
+jacoco {
+    toolVersion = "0.7.9"
+    reportsDir = file("$buildDir/reports")
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports for Debug build"
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    def excludes = [
+            '**/R.class',
+            '**/R$*.class',
+            '**/*$ViewInjector*.*',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            '**/*Test*.*',
+            'android/**/*.*',
+            '**/*Fragment.*',
+            '**/*Activity.*'
+    ]
+
+    classDirectories = fileTree(
+            dir: "$buildDir/intermediates/classes/debug",
+            excludes: excludes
+    ) + fileTree(
+            dir: "$buildDir/tmp/kotlin-classes/debug",
+            excludes: excludes
+    )
+
+    sourceDirectories = files([
+            android.sourceSets.main.java.srcDirs,
+            "src/main/kotlin"
+    ])
+    executionData = files("$buildDir/jacoco/testDebugUnitTest.exec")
 }
 
 dependencies {

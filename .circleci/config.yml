@@ -27,6 +27,9 @@ jobs:
       - run:
           name: Run Tests
           command: ./gradlew lint jacocoTestReport
+      - run:
+          name: Send codecov results
+          command: bash <(curl -s https://codecov.io/bash)
       - store_artifacts:
           path: katana/build/reports
           destination: reports

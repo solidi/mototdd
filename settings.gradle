@@ -1,1 +1,1 @@
-include ':katana'
+include ':katana', ':speed', ':locationapi'

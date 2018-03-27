@@ -1,78 +1,42 @@
 package com.mototdd.katana.speed
 
 import com.mototdd.katana.location.api.*
+import com.nhaarman.mockito_kotlin.*
+import io.reactivex.*
 import org.junit.Test
 
 import org.junit.Assert.*
+import kotlin.math.*
 
 class SpeedProviderTest {
 
-    val testSubject = SpeedProvider(1)
+    val metersPerSecond = (1..100)
+    val locationRepository: LocationRepository = mock {
+        on { speed() } doReturn Observable.fromIterable(metersPerSecond)
+    }
+    val testSubject = SpeedProvider(locationRepository)
 
     @Test
-    fun `Given a single coordinate, then speed is zero`() {
+    fun `Given a speed and KM per H, when I ask for a speed, then I get a converted speed`() {
         // GIVEN
-        val coord = Coordinate()
+        val expected = metersPerSecond.map { (it * 3.6).roundToInt() }
 
         // WHEN
-        val result = testSubject.speed(listOf(coord))
+        val result = metersPerSecond.map { testSubject.speed(SpeedUnit.KM_H) }
 
         // THEN
-        assertEquals(0L, result[0])
+        assertEquals(expected, result)
     }
 
     @Test
-    fun `Given a list of the same coordinate, then all speeds are zero`() {
+    fun `Given a speed and MI per H, when I ask for a speed, then I get a converted speed`() {
         // GIVEN
-        val coord = Coordinate()
-        val listOfCoords = (1..10).map { coord }
+        val expected = metersPerSecond.map { (it * 2.24).roundToInt() }
 
         // WHEN
-        val result = testSubject.speed(listOfCoords)
+        val result = metersPerSecond.map { testSubject.speed(SpeedUnit.MI_H) }
 
         // THEN
-        result.forEach {
-            assertEquals(0L, it)
-        }
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun `Given a windowSize less than 1, then IllegalArgumentException`() {
-        // GIVEN
-        val windowSize = 0
-
-        // WHEN
-        SpeedProvider(windowSize = windowSize)
-    }
-
-    @Test
-    fun `Given window size 1, then speed count is same as coordinate count`() {
-        // GIVEN
-        val coords = (1..10).map { Coordinate() }
-
-        // WHEN
-        val result = testSubject.speed(coords)
-
-        // THEN
-        assertEquals(coords.size, result.size)
-    }
-
-    @Test
-    fun `Given window size of x, then I get the expected speed count`() {
-        // GIVEN
-        val coords = (1..10).map { Coordinate() }
-        val windowSizes = listOf(1, 2, 5, 6, 10)
-        val expectedSize = listOf(10, 9, 6, 5, 1)
-
-        // WHEN
-        val results = windowSizes.map {
-            val ts = SpeedProvider(it)
-            ts.speed(coords)
-        }
-
-        // THEN
-        results.zip(expectedSize) { r, s ->
-            assertEquals(s, r.size)
-        }
+        assertEquals(expected, result)
     }
 }
